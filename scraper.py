@@ -1,3 +1,4 @@
+import requests
 import time
 
 from selenium import webdriver
@@ -9,7 +10,11 @@ STATUS_INCORRECT_PASSWORD = 1
 STATUS_OK = 0
 TEXT_INCORRECT_PASSWORD = "Mandant, Name oder Kennwort ist nicht korrekt. Anmeldung wiederholen"
 BASE_URL = "https://selfservice.campus-dual.de"
-DOWNLOADS_FOLDER = "download"
+BASE_URL_ERP = "https://erp.campus-dual.de"
+DOWNLOAD_PATH = "/home/willy/dl"  # TODO make this configurable
+WAIT_DOWNLOAD = 5
+WAIT_IMPLICIT = 3
+
 
 
 class Scraper():
@@ -63,16 +68,38 @@ class Scraper():
     
     def download_documents(self):
 
-        self.go("/doc/download")
-        # find iframe, then visit iframe page
-        iframe = self.driver.find_element_by_css_selector("iframe")
-        self.driver.get(iframe.get_attribute("src"))
+
+        def get_doclist():
+
+            self.go("/doc/download")
+            # find iframe, then visit iframe page
+            iframe = self.driver.find_element_by_css_selector("iframe")
+            self.driver.get(iframe.get_attribute("src"))
+            
+            return self.driver.find_elements_by_css_selector("img[title='Anlage']")
+
+        doclist = get_doclist()
         
-        doclist = self.driver.find_elements_by_css_selector("img[title='Anlage']")
-        for doc in doclist:
+        for i in range(len(doclist)):
+            doc = get_doclist()[i]
             parent = doc.find_element_by_xpath("../..")
             link = parent.find_element_by_css_selector("a")
-            print(link.text)
+            link.click()
+            time.sleep(3)
+            xmp = self.driver.find_element_by_css_selector("xmp")
+            src =xmp.get_attribute("innerHTML").split("iframe")[1].split("src=\"")[1].split("\"")[0]
+            # TODO maybe implement a nicer way of doing this
+            src = src.replace("&#x2f;", "/")
+            src = src.replace("&#x7e;", "~")
+            src = src.replace("&#x3f;", "?")
+            src = src.replace("&#x3d;", "=")
+            src = src.replace("&#x25;", "%")
+            src = src.replace("&amp;", "&")
+            print(src)
+
+            self.driver.get(BASE_URL_ERP + src)
+            time.sleep(WAIT_DOWNLOAD)  # wait for file to download
+            # TODO move file from tmp path to somewhere sensible
     
 
     def __init__(self, headless=True):
@@ -80,6 +107,12 @@ class Scraper():
         chrome_options = Options()
         if headless:
             chrome_options.add_argument("--headless")
+        
+        prefs = {"download.default_directory": DOWNLOAD_PATH,
+            "plugins.always_open_pdf_externally" : True}
+        chrome_options.add_experimental_option("prefs", prefs)
+        
         self.driver = webdriver.Chrome(options=chrome_options)
         self.driver.set_window_size(1920, 1080)
-        self.driver.implicitly_wait(3)
+        self.driver.implicitly_wait(WAIT_IMPLICIT)
+
