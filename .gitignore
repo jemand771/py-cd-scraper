@@ -130,3 +130,9 @@ dmypy.json
 
 # local credentials folder
 credentials/
+
+# scraped data storage
+download/
+
+# VS Code @ Intenta
+.vscode/
