@@ -100,6 +100,7 @@ class Scraper():
             self.driver.get(BASE_URL_ERP + src)
             time.sleep(WAIT_DOWNLOAD)  # wait for file to download
             # TODO move file from tmp path to somewhere sensible
+            # TODO perform a file diff to check if anything has changed at all (and only if so, replace the file)
     
 
     def __init__(self, headless=True):
