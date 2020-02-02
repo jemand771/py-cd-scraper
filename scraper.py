@@ -16,11 +16,9 @@ WAIT_DOWNLOAD = 5
 WAIT_IMPLICIT = 3
 
 
-
-class Scraper():
+class Scraper:
 
     driver = None
-
 
     def login(self, username, password):
         
@@ -28,7 +26,7 @@ class Scraper():
         self.driver.get(login_url)
 
         # cancel if not redirected
-        if(self.driver.current_url == login_url):
+        if self.driver.current_url == login_url:
             print("auto-redirect doesn't seem to be working")
             return STATUS_CAMPUSDUAL_ERROR
 
@@ -38,10 +36,11 @@ class Scraper():
 
         # wait for redirect to initial page
         for _ in range(10):
-            if(self.driver.current_url == login_url):
+            if self.driver.current_url == login_url:
                 print("login complete, page might be ready now")
                 return STATUS_OK
             print("not ready yet")
+            time.sleep(0.5)
 
         err_msg = self.driver.find_element_by_id("m1-txt")
         if err_msg.text == TEXT_INCORRECT_PASSWORD:
@@ -50,24 +49,19 @@ class Scraper():
 
         return STATUS_CAMPUSDUAL_ERROR
 
-
     def logout(self):
 
         self.go("/index/logout")
-
 
     def exit(self):
 
         self.driver.close()
 
-
     def go(self, url):
 
         self.driver.get(BASE_URL + url)
 
-    
     def download_documents(self):
-
 
         def get_doclist():
 
@@ -101,7 +95,6 @@ class Scraper():
             time.sleep(WAIT_DOWNLOAD)  # wait for file to download
             # TODO move file from tmp path to somewhere sensible
             # TODO perform a file diff to check if anything has changed at all (and only if so, replace the file)
-    
 
     def __init__(self, headless=True):
 
