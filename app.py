@@ -6,18 +6,21 @@ from scraper import Scraper
 
 def main():
 
-    worker = Scraper(False)
+    
 
-    with open("credentials/campusdual.json") as json_file:
-        data = json.load(json_file)
-        login = worker.login(data["username"], data["password"])
-        print("login result", login)
-        if login != 0:
-            worker.exit()
-            exit()
+    json_file = open("credentials/campusdual.json")
+    data = json.load(json_file)
+
+    worker = Scraper(data["username"], False)
+    login = worker.login(data["password"])
+    print("login result", login)
+    if login != 0:
+        worker.exit()
+        exit()
 
     worker.download_documents()
 
+    print("worker is done, exiting")
     worker.logout()
     worker.exit()
 
