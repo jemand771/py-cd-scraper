@@ -3,6 +3,7 @@ import time
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import NoSuchElementException
 
 
 STATUS_CAMPUSDUAL_ERROR = -1
@@ -41,11 +42,13 @@ class Scraper:
                 return STATUS_OK
             print("not ready yet")
             time.sleep(0.5)
-
-        err_msg = self.driver.find_element_by_id("m1-txt")
-        if err_msg.text == TEXT_INCORRECT_PASSWORD:
-            print("username/password combo incorrect")
-            return STATUS_INCORRECT_PASSWORD
+        try:
+            err_msg = self.driver.find_element_by_id("m1-txt")
+            if err_msg.text == TEXT_INCORRECT_PASSWORD:
+                print("username/password combo incorrect")
+                return STATUS_INCORRECT_PASSWORD
+        except NoSuchElementException:
+            return STATUS_CAMPUSDUAL_ERROR
 
         return STATUS_CAMPUSDUAL_ERROR
 
@@ -89,7 +92,7 @@ class Scraper:
             src = src.replace("&#x3d;", "=")
             src = src.replace("&#x25;", "%")
             src = src.replace("&amp;", "&")
-            print(src)
+            print(link.text)
 
             self.driver.get(BASE_URL_ERP + src)
             time.sleep(WAIT_DOWNLOAD)  # wait for file to download
