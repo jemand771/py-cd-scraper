@@ -31,6 +31,7 @@ class Scraper:
     TEMP_DIR = "./tmp"
     DATA_DIR = "./data"
 
+    # TODO maybe create a login decorator for all scrape cases, ensuring that the user is logged in before data is fetched
     def login(self, password):
         
         login_url = BASE_URL + "/index/login"
@@ -113,7 +114,7 @@ class Scraper:
 
             self.driver.get(BASE_URL_ERP + src)
             time.sleep(WAIT_DOWNLOAD)  # wait for file to download
-            
+
             do_copy = False
             infile = self.TEMP_DIR + "Form.pdf"
             outfile = self.DATA_DIR + doctitle + ".pdf"
@@ -130,6 +131,18 @@ class Scraper:
                 print("updated", doctitle)
             else:
                 print(doctitle, "hasn't changed, not replacing")
+
+    def download_timeline(self):
+        """
+        download the timeline, consisting of 6 "FS"
+        each divided into "Theorie" and "Praxis"
+        Dates saved as raw DD.MM.YYYY
+        """
+        
+        self.go("/dash/timeline")
+        alltapes = self.driver.find_element_by_css_selector("div.timeline-event-tape")
+        print(len(alltapes))
+
 
     def __init__(self, username, headless=True):
 

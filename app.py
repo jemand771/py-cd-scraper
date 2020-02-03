@@ -10,16 +10,20 @@ def main():
 
     json_file = open("credentials/campusdual.json")
     data = json.load(json_file)
+    username = data["username"]
+    password = data["password"]
 
-    worker = Scraper(data["username"], False)
-    login = worker.login(data["password"])
+    worker = Scraper(username, False)
+    login = worker.login(password)
     print("login result", login)
     if login != 0:
         worker.exit()
         exit()
 
-    worker.download_documents()
-
+    # TODO implement multiprocessing
+    # worker.download_documents()
+    worker.download_timeline()
+    
     print("worker is done, exiting")
     worker.logout()
     worker.exit()
