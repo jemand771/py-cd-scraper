@@ -13,6 +13,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from tika import parser
 
+import schedule_fixer
+
 
 # general settings go here
 STATUS_CAMPUSDUAL_ERROR = -1
@@ -192,7 +194,6 @@ class Scraper:
             file = open(self.DATA_DIR + 'blocks.json', 'w')
             json.dump(semesters, file)
             file.close()
-        return semesters  # needed for integration with download_schedule
 
     def download_full_schedule(self):
 
@@ -216,9 +217,10 @@ class Scraper:
         if r.status_code != 200:
             print("error querrying json api!")
             return
-        file = open(self.DATA_DIR + 'schedule.json', 'w')
+        file = open(self.DATA_DIR + "schedule.json", 'w')
         json.dump(r.json(), file)
         file.close()
+        schedule_fixer.repair(self.DATA_DIR + "schedule.json", self.DATA_DIR + "schedule-fixed.json")
 
     def __init__(self, username, headless=True):
         
