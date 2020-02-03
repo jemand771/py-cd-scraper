@@ -1,5 +1,6 @@
 import filecmp
 import hashlib
+import json
 import os
 from pathlib import Path
 import requests
@@ -7,6 +8,7 @@ import shutil
 import time
 
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
 from tika import parser
@@ -28,12 +30,14 @@ class Scraper:
     # run specific variables and settings go here
     driver = None
     USERNAME = None
+    PASSWORD = None
     TEMP_DIR = "./tmp"
     DATA_DIR = "./data"
 
     # TODO maybe create a login decorator for all scrape cases, ensuring that the user is logged in before data is fetched
     def login(self, password):
         
+        self.PASSWORD = password
         login_url = BASE_URL + "/index/login"
         self.driver.get(login_url)
 
@@ -132,7 +136,7 @@ class Scraper:
             else:
                 print(doctitle, "hasn't changed, not replacing")
 
-    def download_timeline(self):
+    def download_timeline(self, write_file=True):
         """
         download the timeline, consisting of 6 "FS"
         each divided into "Theorie" and "Praxis"
@@ -140,9 +144,54 @@ class Scraper:
         """
         
         self.go("/dash/timeline")
-        alltapes = self.driver.find_element_by_css_selector("div.timeline-event-tape")
-        print(len(alltapes))
+        alltapes = self.driver.find_elements_by_css_selector("div.timeline-event-tape")
+        alllabels = self.driver.find_elements_by_css_selector("div.timeline-event-label")
+        if len(alllabels) != len(alltapes):
+            print("error! number of tapes does not match number of labels")
+            return -1
+        semesters = list()
+        currsemester = None
+        theory = True
+        for i in reversed(range(len(alltapes))):
+            tape = alltapes[i]
+            label = alllabels[i]
+            dates = tape.get_attribute("title")
+            
+            start = dates.split(" ")[0]
+            end = dates.split(" ")[2]
 
+            sp = label.text.split(" ")
+            if len(sp) == 2:
+                if sp[1] == "FS":
+                    # start of a new semester, save old one (except for first)
+                    if sp[0] != "1.":
+                        semesters.append(currsemester)
+                    else:
+                        if currsemester is not None:
+                            semesters.append(currsemester)
+                            break
+                    currsemester = dict()
+                    currsemester["start"] = start
+                    currsemester["end"] = end
+            else:
+                if label.text not in ("Praxis", "Theorie", ""):
+                    print("error parsing phases")
+                    return None
+                if theory:
+                    if start != currsemester["start"]:
+                        print("something seems to be wrong:", start, "does not equal", currsemester["start"])
+                    currsemester["tend"] = end
+                else:
+                    if end != currsemester["end"]:
+                        print("something seems to be wrong:", end, "does not equal", currsemester["end"])
+                    currsemester["pstart"] = start
+                theory = not theory
+        
+        if write_file:
+            file = open(self.DATA_DIR + 'blocks.json', 'w')
+            json.dump(semesters, file)
+            file.close()
+        return semesters  # needed for integration with download_schedule
 
     def __init__(self, username, headless=True):
 
