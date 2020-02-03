@@ -133,6 +133,8 @@ credentials/
 
 # scraped data storage
 download/
+data/
+tmp/
 
 # VS Code @ Intenta
 .vscode/
