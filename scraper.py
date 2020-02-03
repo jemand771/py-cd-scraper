@@ -1,11 +1,15 @@
+import filecmp
+import hashlib
 import os
 from pathlib import Path
 import requests
+import shutil
 import time
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException
+from tika import parser
 
 
 # general settings go here
@@ -84,14 +88,20 @@ class Scraper:
         doclist = get_doclist()
         
         for i in range(len(doclist)):
+            if i != 3: continue
+            # clean up before downloading
+            try:
+                os.remove(self.TEMP_DIR + "/Form.pdf")
+            except FileNotFoundError:
+                pass
             doc = get_doclist()[i]
             parent = doc.find_element_by_xpath("../..")
             link = parent.find_element_by_css_selector("a")
             doctitle = link.text
             link.click()
-            time.sleep(3)
+            time.sleep(5)  # with 3 seconds, this sometimes crashed. # TODO investigate
             xmp = self.driver.find_element_by_css_selector("xmp")
-            src =xmp.get_attribute("innerHTML").split("iframe")[1].split("src=\"")[1].split("\"")[0]
+            src = xmp.get_attribute("innerHTML").split("iframe")[1].split("src=\"")[1].split("\"")[0]
             # TODO maybe implement a nicer way of doing this
             src = src.replace("&#x2f;", "/")
             src = src.replace("&#x7e;", "~")
@@ -103,8 +113,23 @@ class Scraper:
 
             self.driver.get(BASE_URL_ERP + src)
             time.sleep(WAIT_DOWNLOAD)  # wait for file to download
-            # TODO move file from tmp path to somewhere sensible
-            # TODO perform a file diff to check if anything has changed at all (and only if so, replace the file)
+            
+            do_copy = False
+            infile = self.TEMP_DIR + "Form.pdf"
+            outfile = self.DATA_DIR + doctitle + ".pdf"
+            try:
+                text1 = parser.from_file(infile)["content"]
+                text2 = parser.from_file(outfile)["content"]
+                if text1 != text2:
+                    do_copy = True
+            except FileNotFoundError:
+                print(doctitle + ".pdf not found, writing new")
+                do_copy = True
+            if do_copy:
+                shutil.copyfile(self.TEMP_DIR + "Form.pdf", self.DATA_DIR + doctitle + ".pdf")
+                print("updated", doctitle)
+            else:
+                print(doctitle, "hasn't changed, not replacing")
 
     def __init__(self, username, headless=True):
 
