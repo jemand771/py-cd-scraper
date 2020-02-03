@@ -22,8 +22,9 @@ def main():
 
     # TODO implement multiprocessing
     # worker.download_documents()
-    worker.download_timeline()
-    
+    # worker.download_timeline()
+    worker.download_full_schedule()
+
     print("worker is done, exiting")
     worker.logout()
     worker.exit()

@@ -31,6 +31,7 @@ class Scraper:
     driver = None
     USERNAME = None
     PASSWORD = None
+    HEADLESS = None
     TEMP_DIR = "./tmp"
     DATA_DIR = "./data"
 
@@ -193,8 +194,35 @@ class Scraper:
             file.close()
         return semesters  # needed for integration with download_schedule
 
-    def __init__(self, username, headless=True):
+    def download_full_schedule(self):
 
+        self.go("/room/index")
+        maindiv = self.driver.find_element_by_css_selector("div#main")
+        script = maindiv.find_element_by_css_selector("script")
+        js = script.get_attribute("innerHTML")
+        lines = js.split("\n")
+        api_hash = None
+        for line in lines:
+            if not "hash=\"" in line:
+                continue
+            if api_hash is not None:
+                print("ERROR: unsure on which hash to choose")
+                return
+            api_hash = line.split("\"")[1]
+        lessons = list()
+
+        url = BASE_URL + "/room/json?userid=" + self.USERNAME + "&hash=" + api_hash
+        r = requests.get(url, verify=False)
+        if r.status_code != 200:
+            print("error querrying json api!")
+            return
+        j = r.json()
+        print(len(j))
+        
+
+    def __init__(self, username, headless=True):
+        
+        self.HEADLESS = headless
         self.USERNAME = username
         self.TEMP_DIR = self.TEMP_DIR.replace(".", os.path.dirname(os.path.realpath(__file__))) + "/" + username + "/"
         self.DATA_DIR = self.DATA_DIR.replace(".", os.path.dirname(os.path.realpath(__file__))) + "/" + username + "/"
