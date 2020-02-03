@@ -216,9 +216,9 @@ class Scraper:
         if r.status_code != 200:
             print("error querrying json api!")
             return
-        j = r.json()
-        print(len(j))
-        
+        file = open(self.DATA_DIR + 'schedule.json', 'w')
+        json.dump(r.json(), file)
+        file.close()
 
     def __init__(self, username, headless=True):
         
