@@ -11,6 +11,7 @@ from google.auth.transport.requests import Request
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
 SIMULATE_BEFORE_MERGE = False # this should be set to true, in case i f*ck up any of the conversion
+REQUEST_SLEEP = 0.5
 
 class CalendarApi:
 
@@ -184,6 +185,7 @@ class CalendarApi:
             print("adding", index, "/", len(events))
             index += 1
             self.service.events().insert(calendarId=self.CAL_ID, body=event).execute()
+            time.sleep(REQUEST_SLEEP)
 
     # delete events with these event ids from google calendar
     def del_events(self, event_ids):
@@ -193,6 +195,7 @@ class CalendarApi:
             print("deleting", index, "/", len(event_ids))
             index += 1
             self.service.events().delete(calendarId=self.CAL_ID, eventId=event_id).execute()
+            time.sleep(REQUEST_SLEEP)
 
     def __init__(self):
         
