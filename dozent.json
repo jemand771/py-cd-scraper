@@ -12,7 +12,7 @@
     "alias":[
         "_Leh_",
         "_Lehn",
-        "_Lehng",
+        "Lehng",
         "__Leh"
     ]
 },
@@ -22,6 +22,40 @@
     "alias":[
         "Spor"
     ]
+},
+{
+    "name": "Eimert",
+    "title": "??",
+    "alias": [
+        "_Eim"
+    ]
+},
+{
+    "name": "Ritter",
+    "title": "??",
+    "alias": [
+        "Ritt"
+    ]
+},
+{
+    "name": "Neumann",
+    "title": "??",
+    "alias": [
+        "Neum"
+    ]
+},
+{
+    "name": "Friedrich",
+    "title": "Prof.",
+    "alias": [
+        "Fried"
+    ]
+},
+{
+    "name": "Zetzsche",
+    "title": "??",
+    "alias": [
+        "Zetsc"
+    ]
 }
-
 ]
