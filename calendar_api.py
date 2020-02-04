@@ -22,8 +22,8 @@ class CalendarApi:
         to_add = self.get_events_to_add(schedule, calendar_events)
         to_del = self.get_events_to_delete(schedule, calendar_events)
 
-        print("to add:", to_add)
-        print("to del:", to_del)
+        print("to add:", len(to_add))
+        print("to del:", len(to_del))
         
         sim_to_add = list()
         sim_to_del = list()
