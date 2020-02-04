@@ -43,6 +43,29 @@ class CalendarApi:
             # this should never happen, but it will
             # TODO create handling for this edge case
 
+    def get_gc_from_cd(self, cd_event):
+
+        # TODO i hate timezones. did you know that. this thing will break
+        # and oh boy HOW it will break.
+        # well, not my problem for now
+        event = {
+            "summary": cd_event["title"],
+            "description": "",
+            "start": {
+                "dateTime": cd_event["date"] + "T" + cd_event["start"] + ":00+01:00"
+            },
+            "end": {
+                "dateTime": cd_event["date"] + "T" + cd_event["end"] + ":00+01:00"
+            }
+        }  # TODO convert from campus dual schedule format to google calendar
+        return event
+
+    def match_cd_gc(self, cd_event, gc_event):
+
+        if get_gc_from_cd(cd_event) == gc_event:
+            return True
+        return False
+
 
     # compare a google calendar json to a cd schedule, return a list of elements to add
     def get_events_to_add(self, schedule, events):
