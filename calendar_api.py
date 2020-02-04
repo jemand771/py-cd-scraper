@@ -1,8 +1,10 @@
 from __future__ import print_function
-import datetime
+from datetime import datetime
 import json
 import pickle
 import os.path
+import time
+
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -24,6 +26,8 @@ class CalendarApi:
 
         print("to add:", len(to_add))
         print("to del:", len(to_del))
+        print("sleeping (you have 5 seconds to cancel the potential API inferno)")
+        time.sleep(5)
         
         sim_to_add = list()
         sim_to_del = list()
@@ -74,20 +78,53 @@ class CalendarApi:
 
     def match_calendar_events(self, event1, event2, strict=False):
 
-        fields = ["summary", "description", "location", "start", "end"]
+        fields = ["summary", "description", "location"]
         if strict:  # i am not sure if i will ever use this feature
             fields.append("id")
 
         for field in fields:
             if not field in event1:
+                # print("field", field, "not in event1")
                 return False
             if not field in event2:
+                # print("field", field, "not in event2")
                 return False
             if event1[field] != event2[field]:
+                # print("field", field, "mismatch:", event1[field], ":", event2[field])
+                return False
+
+        # compare start/end time (this will hurt)
+        for field in ("start", "end"):
+            dt1 = event1[field]["dateTime"]
+            dt2 = event2[field]["dateTime"]
+            if not self.dirty_time_compare(dt1, dt2):
                 return False
             
         return True
 
+    def delete_all_events(self):
+
+        events = list()
+        for event in self.get_all_calendar_events():
+            events.append(event["id"])
+        self.del_events(events)
+
+    # warning. dirty dirty code ahead. do not read if you're afraid of the spaghetti monster
+    # edit: hey i might have found a neat-ish solution
+    def dirty_time_compare(self, date1, date2):
+        
+        # day match
+        # if date1.split("T")[0] != date2.split("T")[0]:
+        #     return False
+        form = "%Y-%m-%dT%H:%M:%S%z"
+        # dt1 = datetime.strptime(date1, form)
+        # dt2 = datetime.strptime(date2, form)
+        dt1 = datetime.fromisoformat(date1)
+        dt2 = datetime.fromisoformat(date2)
+        diff = (dt1 - dt2).total_seconds()
+        if diff == 0:
+            return True
+        return False
 
     # compare a google calendar json to a cd schedule, return a list of elements to add
     def get_events_to_add(self, schedule, events):
@@ -122,7 +159,17 @@ class CalendarApi:
     # get a list of all calendar events in the api format
     def get_all_calendar_events(self):
         
-        return self.service.events().list(calendarId=self.CAL_ID).execute()["items"]
+        all_events = list()
+        page_token = None
+        while True:
+            events = self.service.events().list(calendarId=self.CAL_ID, pageToken=page_token).execute()
+            for event in events['items']:
+                all_events.append(event)
+            page_token = events.get('nextPageToken')
+            if not page_token:
+                break
+        # return self.service.events().list(calendarId=self.CAL_ID).execute()["items"]
+        return all_events
 
     # take a calendar api events list and pseudo-merge the proposed changes
     # this can be used to check the translation algorithms integrity
@@ -132,13 +179,19 @@ class CalendarApi:
     # push events to google calendar
     def add_events(self, events):
 
+        index = 1
         for event in events:
+            print("adding", index, "/", len(events))
+            index += 1
             self.service.events().insert(calendarId=self.CAL_ID, body=event).execute()
 
     # delete events with these event ids from google calendar
     def del_events(self, event_ids):
         
+        index = 1
         for event_id in event_ids:
+            print("deleting", index, "/", len(event_ids))
+            index += 1
             self.service.events().delete(calendarId=self.CAL_ID, eventId=event_id).execute()
 
     def __init__(self):
