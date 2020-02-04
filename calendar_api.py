@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+SCOPES = ["https://www.googleapis.com/auth/calendar"]
 SIMULATE_BEFORE_MERGE = False # this should be set to true, in case i f*ck up any of the conversion
 REQUEST_SLEEP = 0.5
 
