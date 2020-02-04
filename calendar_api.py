@@ -27,8 +27,8 @@ class CalendarApi:
 
         print("to add:", len(to_add))
         print("to del:", len(to_del))
-        print("sleeping (you have 5 seconds to cancel the potential API inferno)")
-        time.sleep(5)
+        print("sleeping (you have 3 seconds to cancel the potential API inferno)")
+        time.sleep(3)
         
         sim_to_add = list()
         sim_to_del = list()
