@@ -128,11 +128,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# local credentials folder
-credentials/
+# local config folder, may contain credentials
+config/
 
 # scraped data storage
-download/
 data/
 tmp/
 

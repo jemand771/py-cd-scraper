@@ -8,7 +8,7 @@ def main():
 
     
 
-    json_file = open("credentials/campusdual.json")
+    json_file = open("config/campusdual.json")
     data = json.load(json_file)
     username = data["username"]
     password = data["password"]
