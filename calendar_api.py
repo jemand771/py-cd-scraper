@@ -54,7 +54,8 @@ class CalendarApi:
 
     # get a list of all calendar events in the api format
     def get_all_calendar_events(self):
-        pass
+        
+        return self.service.events().list(calendarId=self.CAL_ID).execute()["items"]
 
     # take a calendar api events list and pseudo-merge the proposed changes
     # this can be used to check the translation algorithms integrity
@@ -63,11 +64,15 @@ class CalendarApi:
 
     # push events to google calendar
     def add_events(self, events):
-        pass
+
+        for event in events:
+            self.service.events().insert(calendarId=self.CAL_ID, body=event).execute()
 
     # delete events with these event ids from google calendar
     def del_events(self, event_ids):
-        pass
+        
+        for event_id in event_ids:
+            self.service.events().delete(calendarId=self.CAL_ID, eventId=event_id).execute()
 
     def __init__(self):
         
