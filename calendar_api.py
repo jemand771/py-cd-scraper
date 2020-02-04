@@ -1,5 +1,6 @@
 from __future__ import print_function
 import datetime
+import json
 import pickle
 import os.path
 from googleapiclient.discovery import build
@@ -11,6 +12,11 @@ SCOPES = ['https://www.googleapis.com/auth/calendar.events']
 class CalendarApi:
 
     service = None
+    CAL_ID = None
+
+    def sync_schedule(self, schedule):
+
+        print(schedule, self.CAL_ID)
 
     def __init__(self):
         
@@ -27,3 +33,7 @@ class CalendarApi:
                 pickle.dump(creds, token)
 
         self.service = build('calendar', 'v3', credentials=creds)
+
+        f = open("config/calendar.json")
+        cid = json.load(f)["cal_id"]
+        self.CAL_ID = cid if cid is not None else "primary"
