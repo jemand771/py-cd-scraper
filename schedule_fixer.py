@@ -2,7 +2,9 @@ import json
 
 
 ROOM_ERROR = "unknown room. an error might have occured. please contact @jemand771 about this"
+PREPEND_TITLES = False
 
+unknown_dozent = list()
 
 def repair(infile, outfile):
 
@@ -41,7 +43,13 @@ def repair(infile, outfile):
 
         if not room_valid(lesson["room"]):
             lesson["room"], lesson["remarks"] = room_and_remarks_from_remarks(lesson["remarks"])
-        
+
+    # lookup for instructors
+    for lesson in data:
+        lesson["instructor"] = dozent_translate(lesson["instructor"])
+    
+    for dozent in unknown_dozent:
+        print("unknown instructor", dozent)
 
     f = open(outfile, "w")
     json.dump(data, f)
@@ -59,6 +67,23 @@ def room_and_remarks_from_remarks(remarks):
     remarks = " ".join(sp[1:])
 
     return (room, remarks)
+
+
+def dozent_translate(name):
+
+    f = open("dozent.json")
+    data = json.load(f)
+    f.close()
+
+    for dozent in data:
+        for alias in dozent["alias"]:
+            if alias == name:
+                if PREPEND_TITLES:
+                    return dozent["title"] + " " + dozent["name"]
+                return dozent["name"]
+    if not name in unknown_dozent:
+        unknown_dozent.append(name)
+    return "unknown (" + name + ")"
 
 
 # TODO make this configurable

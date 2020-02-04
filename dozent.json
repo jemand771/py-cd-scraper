@@ -1,0 +1,27 @@
+[{
+    "name": "Munke",
+    "title": "Prof.",
+    "alias": [
+        "Munke",
+        "_Munk"
+    ]
+},
+{
+    "name": "Lehnguth",
+    "title": "Prof.",
+    "alias":[
+        "_Leh_",
+        "_Lehn",
+        "_Lehng",
+        "__Leh"
+    ]
+},
+{
+    "name": "Sporer",
+    "title": "Prof.",
+    "alias":[
+        "Spor"
+    ]
+}
+
+]
