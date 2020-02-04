@@ -16,7 +16,58 @@ class CalendarApi:
 
     def sync_schedule(self, schedule):
 
-        print(schedule, self.CAL_ID)
+        calendar_events = self.get_all_calendar_events()
+        to_add = self.get_events_to_add(schedule, calendar_events)
+        to_del = self.get_events_to_delete(schedule, calendar_events)
+
+        sim_updated_events = self.simulate_merge_changes(calendar_events, to_add, to_del)
+        sim_to_add = self.get_events_to_add(schedule, sim_updated_events)
+        sim_to_del = self.get_events_to_delete(schedule, sim_updated_events)
+
+        if sim_to_add == 0 and sim_to_del == 0:
+            del_events(to_del)
+            add_events(to_add)
+        else:
+            print("CRITICAL merge error:")
+            print("to_add:", to_add)
+            print("to_del:", to_del)
+            print("sim_to_add:", sim_to_add)
+            print("sim_to_del:", sim_to_del)
+
+        updated_events = self.get_all_calendar_events()
+        up_to_add = self.get_events_to_add(schedule, sim_updated_events)
+        up_to_del = self.get_events_to_delete(schedule, sim_updated_events)
+        
+        if sim_to_add != 0 or sim_to_del != 0:
+            print("something REALLY bad happened while merging.")
+            # this should never happen, but it will
+            # TODO create handling for this edge case
+
+
+    # compare a google calendar json to a cd schedule, return a list of elements to add
+    def get_events_to_add(self, schedule, events):
+        pass
+
+    # compare a google calendar json to a cd schedule, return a list of elements ids to delete
+    def get_events_to_delete(self, schedule, events):
+        pass
+
+    # get a list of all calendar events in the api format
+    def get_all_calendar_events(self):
+        pass
+
+    # take a calendar api events list and pseudo-merge the proposed changes
+    # this can be used to check the translation algorithms integrity
+    def simulate_merge_changes(self, events, to_add, to_delete):
+        pass
+
+    # push events to google calendar
+    def add_events(self, events):
+        pass
+
+    # delete events with these event ids from google calendar
+    def del_events(self, event_ids):
+        pass
 
     def __init__(self):
         
