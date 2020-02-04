@@ -66,8 +66,8 @@ class CalendarApi:
         # well, not my problem for now
         event = {
             "summary": cd_event["title"],
-            "description": "aa",
-            "location": "somewhere over the rainbow",
+            "description": cd_event["instructor"] + "\n" + cd_event["remarks"],
+            "location": cd_event["room"],
             "start": {
                 "dateTime": cd_event["date"] + "T" + cd_event["start"] + ":00+01:00"
             },
