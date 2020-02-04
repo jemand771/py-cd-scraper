@@ -1,5 +1,9 @@
 import json
 
+
+ROOM_ERROR = "unknown room. an error might have occured. please contact @jemand771 about this"
+
+
 def repair(infile, outfile):
 
     f = open(infile)
@@ -31,8 +35,48 @@ def repair(infile, outfile):
         
         for f in ("start", "end"):
             lesson[f] = lesson[f].split(" ")[1]
+
+    # re-label rooms because prof. lehnguth doesn't know how to use cd
+    for lesson in data:
+
+        if not room_valid(lesson["room"]):
+            lesson["room"], lesson["remarks"] = room_and_remarks_from_remarks(lesson["remarks"])
         
 
     f = open(outfile, "w")
     json.dump(data, f)
     f.close()
+
+
+def room_and_remarks_from_remarks(remarks):
+
+    room = ROOM_ERROR
+    sp = remarks.replace("(", "").replace(")", "").split(" ")
+    if len(sp) < 2 or not room_valid(sp[0]):
+        print("unable to parse room from remarks:", remarks)
+        return (room, remarks)
+    room = sp[0]
+    remarks = " ".join(sp[1:])
+
+    return (room, remarks)
+
+
+# TODO make this configurable
+def room_valid(room):
+
+    # special room names that do not conform with a schema
+    if room in ("AULA",):
+        return True
+    
+    # check for standard room format
+    # last 3 digits have to be a room number
+    try:
+        _ = int(room[-3:])
+    except ValueError:
+        return False
+    # everything before those 3 digits has to be a valid identifier
+    if room[:-3] not in ("VR", "SR", "PC", "L"):
+        return False
+
+    # should be fine
+    return True
