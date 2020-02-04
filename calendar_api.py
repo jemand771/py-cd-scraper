@@ -8,6 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 SCOPES = ["https://www.googleapis.com/auth/calendar.events"]
+SIMULATE_BEFORE_MERGE = False # this should be set to true, in case i f*ck up any of the conversion
 
 class CalendarApi:
 
@@ -16,17 +17,24 @@ class CalendarApi:
 
     def sync_schedule(self, schedule):
 
+        # TODO handle duplicate events
         calendar_events = self.get_all_calendar_events()
         to_add = self.get_events_to_add(schedule, calendar_events)
         to_del = self.get_events_to_delete(schedule, calendar_events)
 
-        sim_updated_events = self.simulate_merge_changes(calendar_events, to_add, to_del)
-        sim_to_add = self.get_events_to_add(schedule, sim_updated_events)
-        sim_to_del = self.get_events_to_delete(schedule, sim_updated_events)
+        print("to add:", to_add)
+        print("to del:", to_del)
+        
+        sim_to_add = list()
+        sim_to_del = list()
+        if SIMULATE_BEFORE_MERGE:
+            sim_updated_events = self.simulate_merge_changes(calendar_events, to_add, to_del)
+            sim_to_add = self.get_events_to_add(schedule, sim_updated_events)
+            sim_to_del = self.get_events_to_delete(schedule, sim_updated_events)
 
-        if sim_to_add == 0 and sim_to_del == 0:
-            del_events(to_del)
-            add_events(to_add)
+        if len(sim_to_add) == 0 and len(sim_to_del) == 0:
+            self.del_events(to_del)
+            self.add_events(to_add)
         else:
             print("CRITICAL merge error:")
             print("to_add:", to_add)
@@ -34,14 +42,17 @@ class CalendarApi:
             print("sim_to_add:", sim_to_add)
             print("sim_to_del:", sim_to_del)
 
-        updated_events = self.get_all_calendar_events()
-        up_to_add = self.get_events_to_add(schedule, sim_updated_events)
-        up_to_del = self.get_events_to_delete(schedule, sim_updated_events)
+        if SIMULATE_BEFORE_MERGE:
+            updated_events = self.get_all_calendar_events()
+            up_to_add = self.get_events_to_add(schedule, sim_updated_events)
+            up_to_del = self.get_events_to_delete(schedule, sim_updated_events)
         
-        if sim_to_add != 0 or sim_to_del != 0:
-            print("something REALLY bad happened while merging.")
-            # this should never happen, but it will
-            # TODO create handling for this edge case
+            if len(sim_to_add) != 0 or len(sim_to_del) != 0:
+                print("something REALLY bad happened while merging.")
+                # this should never happen, but it will
+                # TODO create handling for this edge case
+        
+        print("if there were no errors up to this point, the merge was successful! :)")
 
     def get_gc_from_cd(self, cd_event):
 
@@ -50,7 +61,8 @@ class CalendarApi:
         # well, not my problem for now
         event = {
             "summary": cd_event["title"],
-            "description": "",
+            "description": "aa",
+            "location": "somewhere over the rainbow",
             "start": {
                 "dateTime": cd_event["date"] + "T" + cd_event["start"] + ":00+01:00"
             },
@@ -60,20 +72,52 @@ class CalendarApi:
         }  # TODO convert from campus dual schedule format to google calendar
         return event
 
-    def match_cd_gc(self, cd_event, gc_event):
+    def match_calendar_events(self, event1, event2, strict=False):
 
-        if get_gc_from_cd(cd_event) == gc_event:
-            return True
-        return False
+        fields = ["summary", "description", "location", "start", "end"]
+        if strict:  # i am not sure if i will ever use this feature
+            fields.append("id")
+
+        for field in fields:
+            if not field in event1:
+                return False
+            if not field in event2:
+                return False
+            if event1[field] != event2[field]:
+                return False
+            
+        return True
 
 
     # compare a google calendar json to a cd schedule, return a list of elements to add
     def get_events_to_add(self, schedule, events):
-        pass
+        
+        to_add = list()
+        for cd_event in schedule:
+            create = True
+            for gc_event in events:
+                if self.match_calendar_events(self.get_gc_from_cd(cd_event), gc_event):
+                    create = False
+                    break
+            if create:
+                to_add.append(self.get_gc_from_cd(cd_event))
+        return to_add
+
 
     # compare a google calendar json to a cd schedule, return a list of elements ids to delete
     def get_events_to_delete(self, schedule, events):
-        pass
+        
+        to_del = list()
+        for calendar_event in events:
+            delete = True
+            for cd_event in schedule:
+                if self.match_calendar_events(self.get_gc_from_cd(cd_event), calendar_event):
+                    delete = False
+                    break
+            if delete:
+                to_del.append(calendar_event["id"])
+        return to_del
+                    
 
     # get a list of all calendar events in the api format
     def get_all_calendar_events(self):
