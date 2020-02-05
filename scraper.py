@@ -82,6 +82,34 @@ class Scraper:
 
         self.driver.get(BASE_URL + url)
 
+    def download_general(self, write_file=True):
+
+        self.go("/index/login")
+
+        header = self.driver.find_element_by_css_selector("div#header")
+        uni_name = header.find_element_by_css_selector("h3 a").text
+        stinfo = header.find_element_by_css_selector("div#studinfo table tbody tr td").get_attribute("innerHTML")
+
+        fullname = stinfo.split(" (")[0].split("</strong>")[1]
+        group = stinfo.split("</strong>")[2].split("<br>")[0].strip(" ")
+        subject = stinfo.split("<br>")[1].strip(" ").strip("\n").strip(" ")
+
+        data = {
+            "uni_name": uni_name,
+            "student": {
+                "firstname": fullname.split(", ")[1],
+                "lastname": fullname.split(", ")[0],
+                "matnum": self.USERNAME,
+                "group": group
+            },
+            "subject": subject
+        }
+
+        if write_file:
+            file = open(self.DATA_DIR + 'general.json', 'w')
+            json.dump(data, file)
+            file.close()
+
     def download_documents(self):
 
         def get_doclist():
