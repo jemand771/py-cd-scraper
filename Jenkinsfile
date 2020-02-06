@@ -4,9 +4,9 @@ pipeline {
     agent any
 
     parameters {
-        string(name: 'branch', defaultValue: 'master', description: 'Which branch to build')
+        string(name: 'branch_name', defaultValue: 'master', description: 'Which branch to build')
         booleanParam(name: 'push_docker', defaultValue: true, description: 'Disable to only build+test the image')
-        booleanParam(name: 'push_docker_buildnum', defaultValue: true, description: 'Enable to store this build on the docker hub')
+        booleanParam(name: 'push_docker_buildnum', defaultValue: false, description: 'Enable to store this build on the docker hub')
     }
 
     options {
@@ -39,20 +39,20 @@ pipeline {
             
             // push image only if corresponding build flag was set
             when {
-                expression { return env.PUSH_TO_DOCKER_HUB }
+                expression { return env.push_docker }
             }
             steps {
                 script {
-                    if (env.BRANCH == 'master') {
+                    if (env.branch_name == 'master') {
                         docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                            app.push("${env.BRANCH}")
+                            app.push("${env.branch_name}")
                         }
                     } else{
                         docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
                             app.push("latest")
                         }
                     }
-                    if(env.PUSH_BUILD){
+                    if(env.push_docker_buildnum){
                         docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
                             app.push("build-${env.BUILD_NUMBER}")
                         }
