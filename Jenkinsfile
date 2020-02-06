@@ -16,7 +16,7 @@ pipeline {
             // locally build docker image
             steps {
                 echo "building image for build ${env.BUILD_NUMBER}"
-                app = docker.build("jemand771/cd-scraper")
+                docker.build("jemand771/cd-scraper")
             }
         }
 
