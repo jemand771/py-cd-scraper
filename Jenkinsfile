@@ -32,7 +32,7 @@ pipeline {
             
             // push image only if corresponding build flag was set
             when {
-                expression { return env.PUSH_TO_DOCKER_HUB == "True"}
+                expression { return env.PUSH_TO_DOCKER_HUB }
             }
             steps {
                 script {
