@@ -11,7 +11,9 @@ CALENDAR_SYNC_SLEEP = 60 * 15  # every 15 minutes
 
 def main():
 
-    sync_thread = threading.Thread(target=deamon_calendar.run_loop, args=(CALENDAR_SYNC_SLEEP,))
+    cdeamon = deamon_calendar.CalendarDeamon()
+
+    sync_thread = threading.Thread(target=cdeamon.run_loop, args=(CALENDAR_SYNC_SLEEP,))
     sync_thread.start()
 
     print("startup complete")
