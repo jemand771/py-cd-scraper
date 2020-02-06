@@ -263,6 +263,8 @@ class Scraper:
         chrome_options = Options()
         if headless:
             chrome_options.add_argument("--headless")
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
         
         prefs = {"download.default_directory": self.TEMP_DIR,
             "plugins.always_open_pdf_externally" : True}

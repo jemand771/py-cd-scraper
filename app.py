@@ -13,7 +13,7 @@ def main():
     username = data["username"]
     password = data["password"]
 
-    worker = Scraper(username, False)
+    worker = Scraper(username)
     login = worker.login(password)
     print("login result", login)
     if login != 0:
