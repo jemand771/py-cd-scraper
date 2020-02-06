@@ -43,7 +43,7 @@ pipeline {
             }
             steps {
                 script {
-                    if (${env.branch_name} == 'master') {
+                    if (params.branch_name == 'master') {
                         docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
                             app.push("${env.branch_name}")
                         }
@@ -52,7 +52,7 @@ pipeline {
                             app.push("latest")
                         }
                     }
-                    if(${env.push_docker_buildnum}){
+                    if(params.push_docker_buildnum){
                         docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
                             app.push("build-${env.BUILD_NUMBER}")
                         }
