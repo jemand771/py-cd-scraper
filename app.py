@@ -24,7 +24,7 @@ def main():
     # worker.download_documents()
     # worker.download_timeline()
     # worker.download_full_schedule()
-    worker.download_general()
+    # worker.download_general()
 
     print("worker is done, exiting")
     worker.logout()
