@@ -3,6 +3,8 @@ FROM python:3
 # TODO create app dir
 # TODO maybe run as non-root user
 COPY *.py /
+# TODO find a better file location for this
+COPY dozent.json /
 
 # install pip packages
 COPY requirements.txt /tmp/
