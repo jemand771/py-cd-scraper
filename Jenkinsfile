@@ -3,6 +3,10 @@ def app
 pipeline {
     agent any
 
+    triggers {
+        pollSCM("* * * * *")  // TODO maybe one day i will find out how to use webhooks
+    }
+
     parameters {
         string(name: 'branch_name', defaultValue: 'master', description: 'Which branch to build')
         booleanParam(name: 'push_docker', defaultValue: true, description: 'Disable to only build+test the image')
