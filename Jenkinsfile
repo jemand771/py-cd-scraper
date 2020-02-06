@@ -8,7 +8,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'branch_name', defaultValue: 'master', description: 'Which branch to build')
+        string(name: 'branch_name', defaultValue: '*', description: 'Which branch to build')
         booleanParam(name: 'push_docker', defaultValue: true, description: 'Disable to only build+test the image')
         booleanParam(name: 'push_docker_buildnum', defaultValue: false, description: 'Enable to store this build on the docker hub')
     }
