@@ -24,6 +24,8 @@ pipeline {
             
 
             steps {
+                echo "branch env ${env.BRANCH_NAME}"
+                echo "branch param ${params.branch_name}"
                 checkout scm
             }
         }
