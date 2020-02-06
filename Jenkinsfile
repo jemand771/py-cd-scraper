@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    options {
+        // i want the checkout stage to have a different name, so bye
+        skipDefaultCheckout(true)
+    }
+
     stages {
 
         stage('checkout') {
