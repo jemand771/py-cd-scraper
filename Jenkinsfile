@@ -1,3 +1,5 @@
+def app
+
 pipeline {
     agent any
 
@@ -22,7 +24,6 @@ pipeline {
             steps {
                 echo "building image for build ${env.BUILD_NUMBER}"
                 script {
-                    def app
                     app = docker.build("jemand771/cd-scraper")
                 }
             }
