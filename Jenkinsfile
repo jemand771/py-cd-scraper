@@ -3,6 +3,12 @@ def app
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'branch', defaultValue: 'master', description: 'Which branch to build')
+        booleanParam(name: 'push_docker', defaultValue: true, description: 'Disable to only build+test the image')
+        booleanParam(name: 'push_docker_buildnum', defaultValue: true, description: 'Enable to store this build on the docker hub')
+    }
+
     options {
         // i want the checkout stage to have a different name, so bye
         skipDefaultCheckout(true)
