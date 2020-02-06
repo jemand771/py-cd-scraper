@@ -16,7 +16,10 @@ pipeline {
             // locally build docker image
             steps {
                 echo "building image for build ${env.BUILD_NUMBER}"
-                docker.build("jemand771/cd-scraper")
+                script {
+                    def app
+                    app = docker.build("jemand771/cd-scraper")
+                }
             }
         }
 
@@ -27,9 +30,11 @@ pipeline {
                 expression { return env.PUSH_TO_DOCKER_HUB == "True"}
             }
             steps {
-                docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                    app.push("${env.BUILD_NUMBER}")
-                    app.push("latest")
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push("latest")
+                    }
                 }
             }
         }
