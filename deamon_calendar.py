@@ -12,7 +12,7 @@ class CalendarDeamon:
     def run_loop(self, sleeps):
 
         while True:
-            run_once()
+            self.run_once()
             print("sync sleeping for", sleeps, "seconds")
             for i in range(sleeps):
                 if self.killer.kill_now:
