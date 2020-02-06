@@ -1,27 +1,28 @@
 pipeline {
     agent any
-    def app
 
     stages {
 
-        stage('Clone repository') {
-            /* Let's make sure we have the repository cloned to our workspace */
+        stage('checkout') {
+            
 
-            checkout scm
+            steps {
+                checkout scm
+            }
         }
 
-        stage('Build image') {
-            /* This builds the actual image; synonymous to
-            * docker build on the command line */
-
-            app = docker.build("jemand771/cd-scraper")
+        stage('build image') {
+            
+            // locally build docker image
+            steps {
+                echo "building image for build ${env.BUILD_NUMBER}"
+                app = docker.build("jemand771/cd-scraper")
+            }
         }
 
-        stage('Push image') {
-            /* Finally, we'll push the image with two tags:
-            * First, the incremental build number from Jenkins
-            * Second, the 'latest' tag.
-            * Pushing multiple tags is cheap, as all the layers are reused. */
+        stage('push image') {
+            
+            // push image only if corresponding build flag was set
             when {
                 expression { return env.PUSH_TO_DOCKER_HUB == "True"}
             }
