@@ -37,9 +37,19 @@ pipeline {
             }
             steps {
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("${env.BRANCH}")
+                    if (env.BRANCH == 'master') {
+                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                            app.push("${env.BRANCH}")
+                        }
+                    } else{
+                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                            app.push("latest")
+                        }
+                    }
+                    if(env.PUSH_BUILD){
+                        docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                            app.push("build-${env.BUILD_NUMBER}")
+                        }
                     }
                 }
             }
