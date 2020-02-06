@@ -1,9 +1,17 @@
 import json
+import time
 
 import schedule_fixer
 import calendar_api
 from scraper import Scraper
 
+
+def run_loop(sleeps):
+
+    while True:
+        run_once()
+        print("sync sleeping for", sleeps, "seconds")
+        time.sleep(sleeps)
 
 def run_once():
 
