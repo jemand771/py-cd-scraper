@@ -82,6 +82,18 @@ class Scraper:
 
         self.driver.get(BASE_URL + url)
 
+    def download_exam_results(self, write_file=True):
+
+        self.go("/acwork/index")
+        
+        modules = []
+        lastmod = None
+        rows = self.driver.find_elements_by_css_selector("table#acwork tbody tr")
+        for row in rows:
+            cols = row.find_elements_by_css_selector("td")
+            # TODO select mode from number of cols
+            
+
     def download_general(self, write_file=True):
 
         self.go("/index/login")
