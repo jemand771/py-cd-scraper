@@ -134,7 +134,12 @@ class Scraper:
         
         # last module is not pushed during loop
         modules.append(lastmod)
-        print(json.dumps(modules))
+
+        if write_file:
+            file = open(self.DATA_DIR + 'exams.json', 'w')
+            json.dump(modules, file)
+            file.close()
+        return modules
             
 
     def download_general(self, write_file=True):
