@@ -84,14 +84,57 @@ class Scraper:
 
     def download_exam_results(self, write_file=True):
 
+        def is_col_tick(col):
+            return (col.find_element_by_css_selector("img").get_attribute("src") == BASE_URL + "/images/green.png")
+
         self.go("/acwork/index")
         
         modules = []
         lastmod = None
+        colmode = 0
         rows = self.driver.find_elements_by_css_selector("table#acwork tbody tr")
         for row in rows:
             cols = row.find_elements_by_css_selector("td")
-            # TODO select mode from number of cols
+            if len(cols) == 7:
+                colmode += 1
+                continue
+            if colmode == 1:
+                # get first block, module by module, exam by exam
+                folder_link = cols[0].find_elements_by_css_selector("a")
+                if len(folder_link) == 1:
+                    # this is a folder
+                    if lastmod is not None:
+                        modules.append(lastmod)
+
+                    lastmod = {
+                        "title": cols[0].find_element_by_css_selector("a strong").text,
+                        "mark": cols[1].find_element_by_css_selector("strong div").text,
+                        "passed": is_col_tick(cols[2]),
+                        "cp": cols[3].text,
+                        "period": cols[7].text
+                    }
+                    # populate module data
+                    lastmod["exams"] = list()
+                else:
+                    # populate exam data
+                    exam = {
+                        "title": cols[0].text,
+                        "mark": cols[1].find_element_by_css_selector("div").text,
+                        "passed": is_col_tick(cols[2]),
+                        "date-taken": cols[4].text,
+                        "date-published": cols[5].text,
+                        "period": cols[7].text
+                    }
+
+                    lastmod["exams"].append(exam)
+                    
+            # TODO there might be more kinds of results
+            if colmode > 1:
+                break 
+        
+        # last module is not pushed during loop
+        modules.append(lastmod)
+        print(json.dumps(modules))
             
 
     def download_general(self, write_file=True):
