@@ -101,11 +101,12 @@ class CalendarApi:
             
         return True
 
-    def delete_all_events(self):
+    def delete_all_events(self, del_all=False):
 
         events = list()
         for event in self.get_all_calendar_events():
-            events.append(event["id"])
+            if not self.is_event_whitelisted(event) or del_all:
+                events.append(event["id"])
         self.del_events(events)
 
     # warning. dirty dirty code ahead. do not read if you're afraid of the spaghetti monster
@@ -145,6 +146,8 @@ class CalendarApi:
         
         to_del = list()
         for calendar_event in events:
+            if self.is_event_whitelisted(calendar_event):
+                continue
             delete = True
             for cd_event in schedule:
                 if self.match_calendar_events(self.get_gc_from_cd(cd_event), calendar_event):
@@ -174,6 +177,11 @@ class CalendarApi:
     # this can be used to check the translation algorithms integrity
     def simulate_merge_changes(self, events, to_add, to_delete):
         pass
+
+    def is_event_whitelisted(self, event):
+        if event["summary"][0] == "_":
+            return True
+        return False
 
     # push events to google calendar
     def add_events(self, events):
@@ -214,3 +222,4 @@ class CalendarApi:
         f = open("config/calendar.json")
         cid = json.load(f)["cal_id"]
         self.CAL_ID = cid if cid is not None else "primary"
+
