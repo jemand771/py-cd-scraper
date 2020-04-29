@@ -58,15 +58,20 @@ def repair(infile, outfile):
 
 def room_and_remarks_from_remarks(remarks):
 
+    fernstudium_tags = ["Fernlehre", "Fernstudium"]
     room = ROOM_ERROR
     sp = remarks.replace("(", "").replace(")", "").split(" ")
     if len(sp) < 2 or not room_valid(sp[0]):
+        if any([x in remarks for x in fernstudium_tags]):
+            for x in fernstudium_tags:
+                remarks = remarks.replace(x, "")
+            return "zuhause :)", remarks
         print("unable to parse room from remarks:", remarks)
-        return (room, remarks)
+        return room, remarks
     room = sp[0]
     remarks = " ".join(sp[1:])
 
-    return (room, remarks)
+    return room, remarks
 
 
 def dozent_translate(name):
@@ -90,7 +95,7 @@ def dozent_translate(name):
 def room_valid(room):
 
     # special room names that do not conform with a schema
-    if room in ("AULA",):
+    if room in ("AULA", "Z_TI1"):
         return True
     
     # check for standard room format

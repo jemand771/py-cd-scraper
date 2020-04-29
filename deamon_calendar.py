@@ -7,6 +7,9 @@ from scraper import Scraper
 from kill_helper import GracefulKiller
 
 
+FORBIDDEN_DATES = ["2020-04-" + str(i).zfill(2) for i in list(range(6, 11)) + list(range(13, 18)) + list(range(20, 25)) + list(range(27, 31))] + ["2020-05-01"]
+
+
 class CalendarDeamon:
 
     def run_loop(self, sleeps):
@@ -49,7 +52,7 @@ class CalendarDeamon:
         f = open("data/" + username + "/schedule-fixed.json", "r")
         sch = json.load(f)
         f.close()
-        calendar.sync_schedule(sch)
+        calendar.sync_schedule([s for s in sch if s["date"] not in FORBIDDEN_DATES])
 
     def __init__(self):
         

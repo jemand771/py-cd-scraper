@@ -67,17 +67,18 @@ class CalendarApi:
             "description": cd_event["instructor"] + "\n" + cd_event["remarks"],
             "location": cd_event["room"],
             "start": {
-                "dateTime": cd_event["date"] + "T" + cd_event["start"] + ":00+01:00"
+                "dateTime": cd_event["date"] + "T" + cd_event["start"] + ":00+02:00"
             },
             "end": {
-                "dateTime": cd_event["date"] + "T" + cd_event["end"] + ":00+01:00"
-            }
+                "dateTime": cd_event["date"] + "T" + cd_event["end"] + ":00+02:00"
+            },
+            "colorId": "9" if cd_event["room"] in ("zuhause :)", "Z_TI1") else "8"
         }  # TODO convert from campus dual schedule format to google calendar
         return event
 
     def match_calendar_events(self, event1, event2, strict=False):
 
-        fields = ["summary", "description", "location"]
+        fields = ["summary", "description", "location", "colorId"]
         if strict:  # i am not sure if i will ever use this feature
             fields.append("id")
 
