@@ -1,0 +1,3 @@
+FROM jemand771/cd-scraper
+
+CMD ["python", "app.py", "discord"]

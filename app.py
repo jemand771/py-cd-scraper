@@ -1,20 +1,27 @@
 import json
+import sys
 import threading
 import time
 
 from scraper import Scraper
 import deamon_calendar
-
+import deamon_exam_bot
 
 CALENDAR_SYNC_SLEEP = 60 * 15  # every 15 minutes
+DISCORD_BOT_SLEEP = 60 * 15  # every 15 minutes
 
 
 def main():
+    if len(sys.argv) == 2 and sys.argv[1] == "discord":
+        dcdeamon = deamon_exam_bot.ExamDeamon()
 
-    cdeamon = deamon_calendar.CalendarDeamon()
+        sync_thread = threading.Thread(target=dcdeamon.run_loop, args=(DISCORD_BOT_SLEEP,))
+        sync_thread.start()
+    else:
+        cdeamon = deamon_calendar.CalendarDeamon()
 
-    sync_thread = threading.Thread(target=cdeamon.run_loop, args=(CALENDAR_SYNC_SLEEP,))
-    sync_thread.start()
+        sync_thread = threading.Thread(target=cdeamon.run_loop, args=(CALENDAR_SYNC_SLEEP,))
+        sync_thread.start()
 
     print("startup complete")
     return
