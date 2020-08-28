@@ -62,8 +62,9 @@ class CalendarApi:
         # TODO i hate timezones. did you know that. this thing will break
         # and oh boy HOW it will break.
         # well, not my problem for now
+        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1")
         event = {
-            "summary": cd_event["title"],
+            "summary": cd_event["title"] + " (" + ("O" if fernlehre else "P") + ")",
             "description": cd_event["instructor"] + "\n" + cd_event["remarks"],
             "location": cd_event["room"],
             "start": {
@@ -72,7 +73,7 @@ class CalendarApi:
             "end": {
                 "dateTime": cd_event["date"] + "T" + cd_event["end"] + ":00+02:00"
             },
-            "colorId": "9" if cd_event["room"] in ("zuhause :)", "Z_TI1") else "8"
+            "colorId": "9" if fernlehre else "8"
         }  # TODO convert from campus dual schedule format to google calendar
         return event
 
