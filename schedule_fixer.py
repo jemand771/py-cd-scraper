@@ -59,10 +59,11 @@ def repair(infile, outfile):
 def room_and_remarks_from_remarks(remarks):
 
     fernstudium_tags = ["Fernlehre", "Fernstudium"]
+    definitely_presence_tags = ["Prüfungswoche"]
     room = ROOM_ERROR
     sp = remarks.replace("(", "").replace(")", "").split(" ")
     if len(sp) < 2 or not room_valid(sp[0]):
-        if any([x in remarks for x in fernstudium_tags]):
+        if any([x in remarks for x in fernstudium_tags]) and all ([x not in remarks for x in definitely_presence_tags]):
             for x in fernstudium_tags:
                 remarks = remarks.replace(x, "")
             return "zuhause :)", remarks
