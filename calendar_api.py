@@ -62,7 +62,10 @@ class CalendarApi:
         # TODO i hate timezones. did you know that. this thing will break
         # and oh boy HOW it will break.
         # well, not my problem for now
-        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1")
+
+        # override fernlehre flag for prüfungswoche
+        definitely_presence_tags = ["Prüfungswoche"]
+        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1") and all([x not in cd_event["remarks"] for x in definitely_presence_tags])
         event = {
             "summary": cd_event["title"] + " (" + ("O" if fernlehre else "P") + ")",
             "description": cd_event["instructor"] + "\n" + cd_event["remarks"],
