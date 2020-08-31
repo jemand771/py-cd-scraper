@@ -76,7 +76,7 @@ def room_and_remarks_from_remarks(remarks):
 
 def dozent_translate(name):
 
-    f = open("dozent.json")
+    f = open("config/dozent.json")
     data = json.load(f)
     f.close()
 
