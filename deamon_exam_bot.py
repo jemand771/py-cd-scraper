@@ -64,9 +64,9 @@ class ExamDeamon:
         print(new_results)
         if new_results:
 
-            self.send_discord_notification(None, ex_nicks_results)
+            self.send_discord_notification(None, new_results)
             with open(tempfile, "w") as f:
-                json.dump(known + ex_nicks_results, f, indent=2)
+                json.dump(known + new_results, f, indent=2)
             return
 
         print("nothing new, going to sleep")

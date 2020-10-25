@@ -8,13 +8,15 @@ import time
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+import pytz
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-SIMULATE_BEFORE_MERGE = False # this should be set to true, in case i f*ck up any of the conversion
+SIMULATE_BEFORE_MERGE = False  # this should be set to true, in case i f*ck up any of the conversion
 REQUEST_SLEEP = 0.5
+TIMEZONE = pytz.timezone('Europe/Berlin')
+
 
 class CalendarApi:
-
     service = None
     CAL_ID = None
 
@@ -27,7 +29,7 @@ class CalendarApi:
 
         print("to add:", len(to_add))
         print("to del:", len(to_del))
-        
+
         sim_to_add = list()
         sim_to_del = list()
         if SIMULATE_BEFORE_MERGE:
@@ -49,35 +51,40 @@ class CalendarApi:
             updated_events = self.get_all_calendar_events()
             up_to_add = self.get_events_to_add(schedule, sim_updated_events)
             up_to_del = self.get_events_to_delete(schedule, sim_updated_events)
-        
+
             if len(sim_to_add) != 0 or len(sim_to_del) != 0:
                 print("something REALLY bad happened while merging.")
                 # this should never happen, but it will
                 # TODO create handling for this edge case
-        
+
         print("if there were no errors up to this point, the merge was successful! :)")
 
     def get_gc_from_cd(self, cd_event):
 
-        # TODO i hate timezones. did you know that. this thing will break
-        # and oh boy HOW it will break.
-        # well, not my problem for now
-
+        # TODO i hate timezones.
+        # dirty code alert
+        dst_suffix = ":00+0" + ("2" if bool(
+            TIMEZONE.localize(datetime(
+                *[int(x) for x in
+                  cd_event["date"].split("-") + cd_event["start"].split(":")
+                  ]
+            ), is_dst=None).dst()) else "1") + ":00"
         # override fernlehre flag for prüfungswoche
         definitely_presence_tags = ["Prüfungswoche"]
-        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1") and all([x not in cd_event["remarks"] for x in definitely_presence_tags])
+        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1") and all(
+            [x not in cd_event["remarks"] for x in definitely_presence_tags])
         event = {
             "summary": cd_event["title"] + " (" + ("O" if fernlehre else "P") + ")",
             "description": cd_event["instructor"] + "\n" + cd_event["remarks"],
             "location": cd_event["room"],
             "start": {
-                "dateTime": cd_event["date"] + "T" + cd_event["start"] + ":00+02:00"
+                "dateTime": cd_event["date"] + "T" + cd_event["start"] + dst_suffix
             },
             "end": {
-                "dateTime": cd_event["date"] + "T" + cd_event["end"] + ":00+02:00"
+                "dateTime": cd_event["date"] + "T" + cd_event["end"] + dst_suffix
             },
             "colorId": "9" if fernlehre else "8"
-        }  # TODO convert from campus dual schedule format to google calendar
+        }
         return event
 
     def match_calendar_events(self, event1, event2, strict=False):
@@ -103,7 +110,7 @@ class CalendarApi:
             dt2 = event2[field]["dateTime"]
             if not self.dirty_time_compare(dt1, dt2):
                 return False
-            
+
         return True
 
     def delete_all_events(self, del_all=False):
@@ -117,7 +124,7 @@ class CalendarApi:
     # warning. dirty dirty code ahead. do not read if you're afraid of the spaghetti monster
     # edit: hey i might have found a neat-ish solution
     def dirty_time_compare(self, date1, date2):
-        
+
         # day match
         # if date1.split("T")[0] != date2.split("T")[0]:
         #     return False
@@ -133,7 +140,7 @@ class CalendarApi:
 
     # compare a google calendar json to a cd schedule, return a list of elements to add
     def get_events_to_add(self, schedule, events):
-        
+
         to_add = list()
         for cd_event in schedule:
             create = True
@@ -145,10 +152,9 @@ class CalendarApi:
                 to_add.append(self.get_gc_from_cd(cd_event))
         return to_add
 
-
     # compare a google calendar json to a cd schedule, return a list of elements ids to delete
     def get_events_to_delete(self, schedule, events):
-        
+
         to_del = list()
         for calendar_event in events:
             if self.is_event_whitelisted(calendar_event):
@@ -161,11 +167,10 @@ class CalendarApi:
             if delete:
                 to_del.append(calendar_event["id"])
         return to_del
-                    
 
     # get a list of all calendar events in the api format
     def get_all_calendar_events(self):
-        
+
         all_events = list()
         page_token = None
         while True:
@@ -200,7 +205,7 @@ class CalendarApi:
 
     # delete events with these event ids from google calendar
     def del_events(self, event_ids):
-        
+
         index = 1
         for event_id in event_ids:
             print("deleting", index, "/", len(event_ids))
@@ -209,7 +214,7 @@ class CalendarApi:
             time.sleep(REQUEST_SLEEP)
 
     def __init__(self):
-        
+
         creds = None
         if os.path.exists("config/calendar-token.pickle"):
             with open("config/calendar-token.pickle", "rb") as token:
@@ -227,4 +232,3 @@ class CalendarApi:
         f = open("config/calendar.json")
         cid = json.load(f)["cal_id"]
         self.CAL_ID = cid if cid is not None else "primary"
-
