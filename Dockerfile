@@ -5,7 +5,9 @@ RUN apt-get update
 RUN apt-get install -y chromium
 
 # download + install chromedriver
-RUN wget -O /tmp/driver.zip https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_linux64.zip
+RUN CHROMEVER=$(chromium --product-version | grep -o "[^\.]*\.[^\.]*\.[^\.]*") && \
+    DRIVERVER=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROMEVER") && \
+    wget -O /tmp/driver.zip https://chromedriver.storage.googleapis.com/$DRIVERVER/chromedriver_linux64.zip
 RUN unzip /tmp/driver.zip
 RUN mv chromedriver /bin/chromedriver
 
