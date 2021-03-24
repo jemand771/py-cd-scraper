@@ -95,7 +95,7 @@ def dozent_translate(name):
 def room_valid(room):
 
     # special room names that do not conform with a schema
-    if room in ("AULA", "Z_TI1"):
+    if room in ("AULA", "Z_TI1", "Z_TI2", "Z_TI3", "____"):
         return True
     
     # check for standard room format
