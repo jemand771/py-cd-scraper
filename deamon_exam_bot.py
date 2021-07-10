@@ -44,11 +44,15 @@ class ExamDeamon:
         
         if self.killer.kill_now:
             print("login successful, but program is being terminated. not downloading schedule. NOT notifying discord. exiting")
+            worker.exit()
             exit()
 
         if self.killer.kill_now:
             print("download completed, but program is being terminated. NOT notifying discord. exiting")
+            worker.exit()
             exit()
+
+        worker.exit()
 
         tempfile = "config/temp.json"
         if not os.path.exists(tempfile):

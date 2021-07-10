@@ -39,6 +39,7 @@ class CalendarDeamon:
         
         if self.killer.kill_now:
             print("login successful, but program is being terminated. not downloading schedule. NOT pushing to calendar. exiting")
+            worker.exit()
             exit()
 
         worker.download_full_schedule()
@@ -46,7 +47,10 @@ class CalendarDeamon:
 
         if self.killer.kill_now:
             print("download completed, but program is being terminated. NOT pushing to calendar. exiting")
+            worker.exit()
             exit()
+
+        worker.exit()
 
         calendar = calendar_api.CalendarApi()
         f = open("data/" + username + "/schedule-fixed.json", "r")
