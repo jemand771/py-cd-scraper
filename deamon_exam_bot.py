@@ -47,11 +47,6 @@ class ExamDeamon:
             worker.exit()
             exit()
 
-        if self.killer.kill_now:
-            print("download completed, but program is being terminated. NOT notifying discord. exiting")
-            worker.exit()
-            exit()
-
         tempfile = "config/temp.json"
         if not os.path.exists(tempfile):
             with open(tempfile, "w+") as f:
@@ -65,6 +60,12 @@ class ExamDeamon:
                             results for exam in group["exams"]]
         new_results = [x for x in ex_nicks_results if x not in known]
         print(new_results)
+
+        if self.killer.kill_now:
+            print("download completed, but program is being terminated. NOT notifying discord. exiting")
+            worker.exit()
+            exit()
+
         if new_results:
 
             self.send_discord_notification(None, new_results)
