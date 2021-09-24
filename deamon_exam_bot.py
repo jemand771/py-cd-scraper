@@ -52,8 +52,6 @@ class ExamDeamon:
             worker.exit()
             exit()
 
-        worker.exit()
-
         tempfile = "config/temp.json"
         if not os.path.exists(tempfile):
             with open(tempfile, "w+") as f:
@@ -62,6 +60,7 @@ class ExamDeamon:
         with open(tempfile) as f:
             known = json.load(f)
         results = worker.download_exam_results(False)
+        worker.exit()
         ex_nicks_results = [group["title"] + " /" + exam["title"] + " [" + exam["period"] + "]" for group in
                             results for exam in group["exams"]]
         new_results = [x for x in ex_nicks_results if x not in known]
