@@ -71,7 +71,7 @@ class CalendarApi:
             ), is_dst=None).dst()) else "1") + ":00"
         # override fernlehre flag for prüfungswoche
         definitely_presence_tags = ["Prüfungswoche"]
-        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1") and all(
+        fernlehre = cd_event["room"] in ("zuhause :)", "Z_TI1", "Z_TI2", "Z_TI3") and all(
             [x not in cd_event["remarks"] for x in definitely_presence_tags])
         event = {
             "summary": cd_event["title"] + " (" + ("O" if fernlehre else "P") + ")",
