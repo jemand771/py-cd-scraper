@@ -1,8 +1,12 @@
 FROM python:3
 
 # install chromium browser
-RUN apt-get update
-RUN apt-get install -y chromium
+RUN \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    chromium \
+    && \
+    apt-get clean
 
 # download + install chromedriver
 RUN CHROMEVER=$(chromium --product-version | grep -o "[^\.]*\.[^\.]*\.[^\.]*") && \
